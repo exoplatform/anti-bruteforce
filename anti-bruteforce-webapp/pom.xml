@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>anti-bruteforce</artifactId>
+        <groupId>org.exoplatfrom</groupId>
+        <version>1.0.x-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <packaging>war</packaging>
+
+    <artifactId>anti-bruteforce-webapp</artifactId>
+    <name>eXo Anti-bruteforce - Webapp</name>
+
+    <build>
+        <finalName>anti-bruteforce</finalName>
+    </build>
+</project>
