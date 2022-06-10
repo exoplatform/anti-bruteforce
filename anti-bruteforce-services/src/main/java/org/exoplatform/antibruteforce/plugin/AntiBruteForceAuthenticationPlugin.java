@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2022 eXo Platform SAS
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <gnu.org/licenses>.
+ */
 package org.exoplatform.antibruteforce.plugin;
 
 import org.exoplatform.antibruteforce.utils.Utils;
@@ -9,7 +25,7 @@ import org.exoplatform.services.organization.AccountTemporaryLockedException;
 import org.exoplatform.services.organization.OrganizationService;
 import org.exoplatform.services.organization.User;
 import org.exoplatform.services.organization.UserProfile;
-import org.exoplatform.services.organization.auth.SecurityCheckAuthenticationPlugin;
+import org.exoplatform.services.organization.plugin.SecurityCheckAuthenticationPlugin;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
