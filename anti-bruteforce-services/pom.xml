@@ -12,6 +12,10 @@
     <artifactId>anti-bruteforce-services</artifactId>
     <name>eXo Anti-bruteforce - Services</name>
 
+    <properties>
+        <exo.test.coverage.ratio>0.5</exo.test.coverage.ratio>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.exoplatform.gatein.portal</groupId>
