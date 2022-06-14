@@ -15,7 +15,7 @@
                 </value-param>
                 <values-param>
                     <name>add.profiles</name>
-                    <value>antibruteforce</value>
+                    <value>anti-bruteforce</value>
                 </values-param>
                 <object-param>
                     <name>change</name>
@@ -23,7 +23,7 @@
                         <field name="dependencies">
                             <collection type="java.util.ArrayList">
                                 <value>
-                                    <string>antibruteforce</string>
+                                    <string>anti-bruteforce</string>
                                 </value>
                             </collection>
                         </field>
