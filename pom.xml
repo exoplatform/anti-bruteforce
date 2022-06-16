@@ -9,7 +9,7 @@
         <version>16-M01</version>
     </parent>
 
-    <groupId>org.exoplatfrom</groupId>
+    <groupId>org.exoplatform</groupId>
     <artifactId>anti-bruteforce</artifactId>
     <packaging>pom</packaging>
     <version>1.0.x-SNAPSHOT</version>
