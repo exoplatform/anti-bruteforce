@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>anti-bruteforce-packaging</artifactId>
+    <packaging>pom</packaging>
     <name>eXo Anti-bruteforce - Packaging</name>
 
     <dependencies>
