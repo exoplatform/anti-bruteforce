@@ -1,32 +1,46 @@
 package org.exoplatform.antibruteforce.plugin;
 
-import org.exoplatform.antibruteforce.utils.Utils;
-import org.exoplatform.commons.utils.CommonsUtils;
-import org.exoplatform.container.xml.InitParams;
-import org.exoplatform.container.xml.PropertiesParam;
-import org.exoplatform.services.listener.ListenerService;
-import org.exoplatform.services.organization.*;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ CommonsUtils.class, Utils.class })
+import org.exoplatform.antibruteforce.utils.Utils;
+import org.exoplatform.commons.utils.CommonsUtils;
+import org.exoplatform.container.xml.InitParams;
+import org.exoplatform.container.xml.PropertiesParam;
+import org.exoplatform.services.listener.ListenerService;
+import org.exoplatform.services.organization.AccountTemporaryLockedException;
+import org.exoplatform.services.organization.OrganizationService;
+import org.exoplatform.services.organization.User;
+import org.exoplatform.services.organization.UserHandler;
+import org.exoplatform.services.organization.UserProfile;
+import org.exoplatform.services.organization.UserProfileHandler;
+
+@RunWith(MockitoJUnitRunner.class)
 public class AntiBruteForceAuthenticationPluginTest {
+
+  private static final MockedStatic<CommonsUtils>            COMMONS_UTILS             = mockStatic(CommonsUtils.class);
+
+  private static final MockedStatic<Utils>       UTILS        = mockStatic(Utils.class);
 
   @Mock
   private OrganizationService                organizationService;
@@ -36,10 +50,14 @@ public class AntiBruteForceAuthenticationPluginTest {
 
   private AntiBruteForceAuthenticationPlugin antiBruteForceAuthenticationPlugin;
 
+  @AfterClass
+  public static void afterRunBare() throws Exception { // NOSONAR
+    COMMONS_UTILS.close();
+    UTILS.close();
+  }
+
   @Before
   public void setUp() throws Exception {
-    PowerMockito.mockStatic(CommonsUtils.class);
-    PowerMockito.mockStatic(Utils.class);
     InitParams params = new InitParams();
     PropertiesParam maxAuthAttempts = new PropertiesParam();
     maxAuthAttempts.setProperty("maxAuthenticationAttempts", "5");
@@ -87,13 +105,12 @@ public class AntiBruteForceAuthenticationPluginTest {
     when(userProfile.getAttribute("authenticationAttempts")).thenReturn("3");
     this.antiBruteForceAuthenticationPlugin.onCheckFail("user");
     verify(userProfile, times(1)).setAttribute("authenticationAttempts", "4");
-    PowerMockito.verifyStatic(Utils.class, times(0));
-    Utils.sendAccountLockedEmail(user, Locale.ENGLISH, organizationService);
+    UTILS.verifyNoInteractions();
 
     when(userProfile.getAttribute("authenticationAttempts")).thenReturn("4");
     this.antiBruteForceAuthenticationPlugin.onCheckFail("user");
     verify(userProfile, times(1)).setAttribute("authenticationAttempts", "5");
-    PowerMockito.verifyStatic(Utils.class, times(1));
+    UTILS.verify(() -> Utils.sendAccountLockedEmail(eq(user), any(), eq(organizationService)), times(1));
     Utils.sendAccountLockedEmail(user, Locale.ENGLISH, organizationService);
   }
 
