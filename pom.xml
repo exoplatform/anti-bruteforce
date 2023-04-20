@@ -28,8 +28,8 @@
     </scm>
 
     <properties>
-        <org.exoplatform.gatein.portal.version>6.5.x-exo-SNAPSHOT</org.exoplatform.gatein.portal.version>
-        <org.exoplatform.commons.version>6.5.x-exo-SNAPSHOT</org.exoplatform.commons.version>
+        <org.exoplatform.gatein.portal.version>6.5.0-exo-M03</org.exoplatform.gatein.portal.version>
+        <org.exoplatform.commons.version>6.5.0-exo-M03</org.exoplatform.commons.version>
     </properties>
     <dependencyManagement>
         <dependencies>
