@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>addons-parent-pom</artifactId>
+        <artifactId>addons-parent-exo-pom</artifactId>
         <groupId>org.exoplatform.addons</groupId>
-        <version>17-exo-M01</version>
+        <version>17-security-fix-SNAPSHOT</version>
     </parent>
 
     <groupId>org.exoplatform.anti-bruteforce</groupId>
@@ -28,22 +28,14 @@
     </scm>
 
     <properties>
-        <org.exoplatform.gatein.portal.version>6.5.x-exo-SNAPSHOT</org.exoplatform.gatein.portal.version>
-        <org.exoplatform.commons.version>6.5.x-exo-SNAPSHOT</org.exoplatform.commons.version>
+        <org.exoplatform.commons-exo.version>6.5.x-security-fix-SNAPSHOT</org.exoplatform.commons-exo.version>
     </properties>
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.exoplatform.gatein.portal</groupId>
-                <artifactId>exo.portal.parent</artifactId>
-                <version>${org.exoplatform.gatein.portal.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.exoplatform.commons</groupId>
-                <artifactId>commons</artifactId>
-                <version>${org.exoplatform.commons.version}</version>
+                <groupId>org.exoplatform.commons-exo</groupId>
+                <artifactId>commons-exo</artifactId>
+                <version>${org.exoplatform.commons-exo.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
