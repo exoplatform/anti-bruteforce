@@ -6,7 +6,7 @@
     <parent>
         <artifactId>addons-exo-parent-pom</artifactId>
         <groupId>org.exoplatform.addons</groupId>
-        <version>17-security-fix-SNAPSHOT</version>
+        <version>17-M01</version>
     </parent>
 
     <groupId>org.exoplatform.anti-bruteforce</groupId>
@@ -28,7 +28,7 @@
     </scm>
 
     <properties>
-        <org.exoplatform.commons-exo.version>6.5.x-security-fix-SNAPSHOT</org.exoplatform.commons-exo.version>
+        <org.exoplatform.commons-exo.version>6.5.x-SNAPSHOT</org.exoplatform.commons-exo.version>
     </properties>
     <dependencyManagement>
         <dependencies>
