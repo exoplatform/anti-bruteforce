@@ -12,7 +12,7 @@
     <groupId>org.exoplatform.anti-bruteforce</groupId>
     <artifactId>anti-bruteforce</artifactId>
     <packaging>pom</packaging>
-    <version>7.3.x-SNAPSHOT</version>
+    <version>7.3.x-maintenance-SNAPSHOT</version>
     <name>eXo Anti-bruteforce - Parent</name>
 
     <modules>
@@ -28,7 +28,7 @@
     </scm>
 
     <properties>
-        <org.exoplatform.commons-exo.version>7.3.x-SNAPSHOT</org.exoplatform.commons-exo.version>
+        <org.exoplatform.commons-exo.version>7.3.x-maintenance-SNAPSHOT</org.exoplatform.commons-exo.version>
         
         <!-- Sonar properties -->
         <sonar.organization>exoplatform</sonar.organization>
