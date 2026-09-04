@@ -15,5 +15,13 @@
 
     <build>
         <finalName>anti-bruteforce</finalName>
+        <plugins>
+          <plugin>
+            <artifactId>maven-war-plugin</artifactId>
+            <configuration>
+              <packagingExcludes>WEB-INF/lib/**,*.less,vue-app/**</packagingExcludes>
+            </configuration>
+          </plugin>
+        </plugins>
     </build>
 </project>
