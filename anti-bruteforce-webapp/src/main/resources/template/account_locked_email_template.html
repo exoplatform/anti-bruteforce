@@ -1,10 +1,10 @@
 <table width="80%" align="center" cellpadding="0" cellspacing="0" border="0">
     <tr>
-        <td style="border: solid 1px #ccc">
+        <td class="mail-border" style="border: solid 1px ${MAIL_BORDER}">
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
                 <!-- begin top-->
-                <tr bgcolor="#f5f5f5" >
-                    <td height="44" valign="middle" align="center" bgcolor="#efefef" style="color: #2e5d97; border-bottom: 1px solid #ccc;">
+                <tr bgcolor="${MAIL_BACKGROUND}" class="mail-bg">
+                    <td height="44" valign="middle" align="center" bgcolor="${MAIL_BACKGROUND}" class="mail-bg mail-link mail-border" style="color: ${MAIL_LINK}; border-bottom: 1px solid ${MAIL_BORDER};">
                         <h2 style="margin: 0;padding: 0; font-size: 18px;">&{antibruteforce.accountLocked.email.header}</h2>
                     </td>
                 </tr>
@@ -12,17 +12,17 @@
 
                 <!--begin body-->
                 <tr align="center">
-                    <td align="center" style="padding: 10px 0 10px">
+                    <td align="center" bgcolor="${MAIL_SURFACE}" class="mail-surface" style="padding: 10px 0 10px">
                         <table width="90%" cellpadding="0" cellspacing="0" >
                             <tr>
-                                <td align="left" style="line-height: 18px;font-size: 13px;color:#333333;font-family:HelveticaNeue,helvetical,arial;">
+                                <td align="left" class="mail-text" style="line-height: 18px;font-size: 13px;color:${MAIL_TEXT};font-family:HelveticaNeue,helvetical,arial;">
                                     <p style="margin: 0 0 10px 0;line-height: 22px">&{antibruteforce.accountLocked.email.hi} ${FIRST_NAME},</p>
                                     <p style="margin: 0 0 10px 0;line-height:22px">&{antibruteforce.accountLocked.email.message}</p>
                                     <table width="100%" cellpadding="0" cellspacing="0">
                                         <tr>
-                                            <td bgcolor="#f9f9f9" style="padding: 10px">
+                                            <td bgcolor="${MAIL_BACKGROUND}" class="mail-bg" style="padding: 10px">
                                                 <p style="margin: 0 0 10px 0;line-height:22px">&{antibruteforce.accountLocked.email.linkDescription}:</p>
-                                                <p style="margin: 0 0 10px 0;line-height:22px"><a href="${FORGOT_PASSWORD_LINK}" style="text-decoration: none;color:#2e5d97">${FORGOT_PASSWORD_LINK}</a></p>
+                                                <p style="margin: 0 0 10px 0;line-height:22px"><a href="${FORGOT_PASSWORD_LINK}" class="mail-link" style="text-decoration: none;color:${MAIL_LINK}">${FORGOT_PASSWORD_LINK}</a></p>
                                             </td>
                                         </tr>
                                     </table>
@@ -35,7 +35,7 @@
 
                 <!-- begin footer-->
                 <tr>
-                    <td height="38" valign="middle" align="center" bgcolor="#486694" style="color:#fff;font-family:HelveticaNeue,helvetical,arial;">
+                    <td height="38" valign="middle" align="center" bgcolor="${MAIL_PRIMARY}" style="color:#fff;font-family:HelveticaNeue,helvetical,arial;">
                         <h2 style="color: #fff;margin: 0;padding: 0; font-size: 13px;">&{antibruteforce.accountLocked.email.footer}</h2>
                     </td>
                 </tr>
