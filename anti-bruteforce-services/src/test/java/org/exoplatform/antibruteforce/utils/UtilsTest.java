@@ -1,5 +1,7 @@
 package org.exoplatform.antibruteforce.utils;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -88,5 +90,18 @@ public class UtilsTest {
     } catch (Exception e) {
       fail();
     }
+  }
+
+  @Test
+  public void testAccountLockedEmailFollowsTheBrandingOfThePlatform() throws Exception {
+    Utils.sendAccountLockedEmail(user, Locale.getDefault(), organizationService);
+    org.mockito.ArgumentCaptor<Message> sent = org.mockito.ArgumentCaptor.forClass(Message.class);
+    Mockito.verify(mailService).sendMessage(sent.capture());
+    String body = sent.getValue().getBody();
+    // without a platform container the branding is the default one: the default font and the default blue
+    assertTrue(body, body.contains("font-family:'Arimo',Arial,Helvetica,sans-serif"));
+    assertTrue(body, body.contains("background-color:" + io.meeds.portal.mail.EmailBrand.DEFAULT_COLOR));
+    assertFalse("every token of the branding is replaced", body.contains("${"));
+    assertFalse("no fixed font is left", body.contains("Verdana"));
   }
 }

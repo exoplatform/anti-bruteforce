@@ -17,6 +17,7 @@
 package org.exoplatform.antibruteforce.utils;
 
 import org.exoplatform.commons.utils.CommonsUtils;
+import io.meeds.portal.mail.EmailBrand;
 import org.exoplatform.commons.utils.MailUtils;
 import org.exoplatform.portal.Constants;
 import org.exoplatform.services.log.ExoLogger;
@@ -109,8 +110,19 @@ public class Utils {
     content = content.replace("${FIRST_NAME}", user.getFirstName());
     content = content.replace("${USERNAME}", user.getUserName());
     content = content.replace("${FORGOT_PASSWORD_LINK}", link);
+    // the colors, the font and the name of the platform branding
+    EmailBrand brand = EmailBrand.current();
+    content = content.replace("${HEADER_COLOR}", brand.getFillColor())
+                     .replace("${HEADER_TEXT_COLOR}", brand.getTextColor())
+                     .replace("${LINK_COLOR}", brand.getLinkColor())
+                     .replace("${FONT_FAMILY}", brand.getFontStack())
+                     .replace("${COMPANY_NAME}", escapeHtml(brand.getCompanyName()));
 
     return content;
+  }
+
+  private static String escapeHtml(String text) {
+    return text == null ? "" : text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;");
   }
 
   private static String resolveLanguage(InputStream input, ResourceBundle bundle) {
