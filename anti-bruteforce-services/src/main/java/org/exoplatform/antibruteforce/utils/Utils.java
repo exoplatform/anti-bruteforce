@@ -16,9 +16,11 @@
  */
 package org.exoplatform.antibruteforce.utils;
 
+import org.exoplatform.commons.notification.mail.MailPalette;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.commons.utils.MailUtils;
 import org.exoplatform.portal.Constants;
+import org.exoplatform.portal.branding.MailDocumentShell;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.mail.MailService;
@@ -52,6 +54,21 @@ public class Utils {
 
   private static final String  ACCOUNT_LOCKED_MAIL_TEMPLATE_PATH    = "template/account_locked_email_template.html";
 
+  private static final String  HEX_COLOR                            = "#[0-9a-fA-F]{3,8}";
+
+  private static final Map<String, String> PALETTE_TOKENS = Map.of("${MAIL_BACKGROUND}",
+                                                                   MailDocumentShell.BACKGROUND,
+                                                                   "${MAIL_SURFACE}",
+                                                                   MailDocumentShell.SURFACE,
+                                                                   "${MAIL_TEXT}",
+                                                                   MailDocumentShell.TEXT,
+                                                                   "${MAIL_LINK}",
+                                                                   MailDocumentShell.LINK,
+                                                                   "${MAIL_PRIMARY}",
+                                                                   MailDocumentShell.PRIMARY,
+                                                                   "${MAIL_BORDER}",
+                                                                   MailDocumentShell.BORDER);
+
   private static final Pattern PATTERN                              = Pattern.compile("&\\{([a-zA-Z\\d\\.]+)\\}");
 
   public static void sendAccountLockedEmail(User user,
@@ -75,7 +92,8 @@ public class Utils {
 
     String url = System.getProperty(CONFIGURED_DOMAIN_URL_KEY) + "/portal" + router.render(params);
 
-    String emailBody = buildAccountLockedEmailBody(user, bundle, url);
+    Map<String, String> palette = MailPalette.forRecipient(user.getUserName());
+    String emailBody = buildAccountLockedEmailBody(user, bundle, url, palette);
     String emailSubject = bundle.getString(ACCOUNT_LOCKED_MAIL_SUBJECT_KEY);
 
     String senderName = MailUtils.getSenderName();
@@ -88,7 +106,7 @@ public class Utils {
     message.setFrom(from);
     message.setTo(user.getEmail());
     message.setSubject(emailSubject);
-    message.setBody(emailBody);
+    message.setBody(MailPalette.wrapInMode(emailBody, palette.get(MailPalette.MODE)));
     message.setMimeType("text/html");
 
     try {
@@ -98,7 +116,10 @@ public class Utils {
     }
   }
 
-  private static String buildAccountLockedEmailBody(User user, ResourceBundle bundle, String link) {
+  private static String buildAccountLockedEmailBody(User user,
+                                                    ResourceBundle bundle,
+                                                    String link,
+                                                    Map<String, String> palette) {
     String content;
     InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream(ACCOUNT_LOCKED_MAIL_TEMPLATE_PATH);
     if (input == null) {
@@ -106,11 +127,29 @@ public class Utils {
     } else {
       content = resolveLanguage(input, bundle);
     }
+    content = applyPalette(content, palette);
     content = content.replace("${FIRST_NAME}", user.getFirstName());
     content = content.replace("${USERNAME}", user.getUserName());
     content = content.replace("${FORGOT_PASSWORD_LINK}", link);
 
     return content;
+  }
+
+  /**
+   * Writes the mail in the colours of its recipient's palette: the light ones
+   * in Automatic, the dark document shell then overriding the role classes.
+   */
+  private static String applyPalette(String content, Map<String, String> palette) {
+    Map<String, String> fallback = MailPalette.of(null);
+    String result = content;
+    for (Map.Entry<String, String> token : PALETTE_TOKENS.entrySet()) {
+      String color = palette.get(token.getValue());
+      if (color == null || !color.matches(HEX_COLOR)) {
+        color = fallback.get(token.getValue());
+      }
+      result = result.replace(token.getKey(), color);
+    }
+    return result;
   }
 
   private static String resolveLanguage(InputStream input, ResourceBundle bundle) {
