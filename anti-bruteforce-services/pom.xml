@@ -33,4 +33,15 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  <build>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+      </testResource>
+      <testResource>
+        <!-- The tests render the template the webapp ships, never a copy -->
+        <directory>../anti-bruteforce-webapp/src/main/resources</directory>
+      </testResource>
+    </testResources>
+  </build>
 </project>
