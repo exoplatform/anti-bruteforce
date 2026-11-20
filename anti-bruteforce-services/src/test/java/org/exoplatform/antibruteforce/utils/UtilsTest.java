@@ -21,6 +21,8 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import io.meeds.portal.mail.model.EmailBrand;
+
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.commons.utils.MailUtils;
 import org.exoplatform.services.mail.MailService;
@@ -98,9 +100,9 @@ public class UtilsTest {
     org.mockito.ArgumentCaptor<Message> sent = org.mockito.ArgumentCaptor.forClass(Message.class);
     Mockito.verify(mailService).sendMessage(sent.capture());
     String body = sent.getValue().getBody();
-    // without a platform container the branding is the default one: the default font and the default blue
+    // without a platform container the branding is the default one: the default font and the fill color of the default color of the platform theme
     assertTrue(body, body.contains("font-family:'Arimo',Arial,Helvetica,sans-serif"));
-    assertTrue(body, body.contains("background-color:" + io.meeds.portal.mail.model.EmailBrand.DEFAULT_COLOR));
+    assertTrue(body, body.contains("background-color:" + new EmailBrand("", EmailBrand.DEFAULT_COLOR).getFillColor()));
     assertFalse("every token of the branding is replaced", body.contains("${"));
     assertFalse("no fixed font is left", body.contains("Verdana"));
   }
