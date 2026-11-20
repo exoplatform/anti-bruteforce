@@ -17,7 +17,7 @@
 package org.exoplatform.antibruteforce.utils;
 
 import org.exoplatform.commons.utils.CommonsUtils;
-import io.meeds.portal.mail.EmailBrand;
+import io.meeds.portal.mail.model.EmailBrand;
 import org.exoplatform.commons.utils.MailUtils;
 import org.exoplatform.portal.Constants;
 import org.exoplatform.services.log.ExoLogger;
