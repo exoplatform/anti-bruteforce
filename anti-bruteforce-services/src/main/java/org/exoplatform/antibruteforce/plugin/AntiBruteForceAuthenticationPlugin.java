@@ -262,7 +262,7 @@ public class AntiBruteForceAuthenticationPlugin extends SecurityCheckAuthenticat
     }
   }
 
-  void sendAccountLockedEmail(User user) {
+  void sendAccountLockedEmail(User user) throws Exception {
     Utils.sendAccountLockedEmail(user, Locale.ENGLISH, organizationService);
   }
 
