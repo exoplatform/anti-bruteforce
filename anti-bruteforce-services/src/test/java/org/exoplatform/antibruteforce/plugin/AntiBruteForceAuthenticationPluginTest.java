@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -23,6 +24,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -35,8 +37,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import org.exoplatform.antibruteforce.utils.Utils;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ValueParam;
 import org.exoplatform.services.listener.ListenerService;
@@ -56,7 +60,7 @@ public class AntiBruteForceAuthenticationPluginTest {
 
   private static final String                USERNAME  = "user";
 
-  private static final Instant               START     = Instant.parse("2026-11-24T10:43:04Z");
+  private static final Instant               START     = Instant.parse("2026-11-24T10:43:04.000123456Z");
 
   @Mock
   private OrganizationService                organizationService;
@@ -109,6 +113,17 @@ public class AntiBruteForceAuthenticationPluginTest {
       plugin.doCheck(user);
     } catch (Exception e) {
       fail("AccountTemporaryLockedException Should not be thrown here");
+    }
+  }
+
+  @Test
+  public void theAccountLockedEmailIsSentByUtils() throws Exception {
+    AntiBruteForceAuthenticationPlugin plugin = new AntiBruteForceAuthenticationPlugin(null,
+                                                                                       organizationService,
+                                                                                       listenerService);
+    try (MockedStatic<Utils> utils = mockStatic(Utils.class)) {
+      plugin.sendAccountLockedEmail(user);
+      utils.verify(() -> Utils.sendAccountLockedEmail(user, Locale.ENGLISH, organizationService), times(1));
     }
   }
 

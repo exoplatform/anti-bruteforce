@@ -17,6 +17,7 @@
 package org.exoplatform.antibruteforce.model;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 /**
  * Failed login attempts of a user: how many in a row, and the time of the
@@ -26,6 +27,15 @@ import java.time.Instant;
 public record FailedLoginState(int attempts, Instant latestFailureTime) {
 
   public static final FailedLoginState NONE = new FailedLoginState(0, Instant.EPOCH);
+
+  /**
+   * The time is kept to the millisecond, the precision the user profile stores
+   * it with, so that a state recorded on this node and the same state read back
+   * from the profile have equal times.
+   */
+  public FailedLoginState {
+    latestFailureTime = latestFailureTime.truncatedTo(ChronoUnit.MILLIS);
+  }
 
   /**
    * For the same failure time, a state with no attempt is a reset written after

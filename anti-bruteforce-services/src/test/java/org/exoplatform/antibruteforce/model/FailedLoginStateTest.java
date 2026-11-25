@@ -16,6 +16,7 @@
  */
 package org.exoplatform.antibruteforce.model;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
 import java.time.Instant;
@@ -54,6 +55,16 @@ public class FailedLoginStateTest {
     FailedLoginState reset = new FailedLoginState(0, TIME);
     assertSame(reset, FailedLoginState.latest(locked, reset));
     assertSame(reset, FailedLoginState.latest(reset, locked));
+  }
+
+  /** A reset read back from the profile, which stores milliseconds, wins over the failures recorded on this node. */
+  @Test
+  public void latestIsTheResetReadFromTheProfileForAFailureTimeWithNanoseconds() {
+    Instant failureTime = TIME.plusNanos(123456);
+    FailedLoginState recorded = new FailedLoginState(5, failureTime);
+    FailedLoginState reset = new FailedLoginState(0, Instant.ofEpochMilli(failureTime.toEpochMilli()));
+    assertEquals(reset.latestFailureTime(), recorded.latestFailureTime());
+    assertSame(reset, FailedLoginState.latest(recorded, reset));
   }
 
 }
