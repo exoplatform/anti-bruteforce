@@ -16,6 +16,7 @@
  */
 package org.exoplatform.antibruteforce.plugin;
 
+import org.exoplatform.antibruteforce.model.FailedLogin;
 import org.exoplatform.antibruteforce.model.FailedLoginState;
 import org.exoplatform.antibruteforce.utils.Utils;
 import org.exoplatform.container.xml.InitParams;
@@ -168,9 +169,7 @@ public class AntiBruteForceAuthenticationPlugin extends SecurityCheckAuthenticat
     try {
       User user = organizationService.getUserHandler().findUserByName(userName);
       if (user != null) {
-        record Failure(Instant now, FailedLoginState previousState, FailedLoginState newState) {
-        }
-        Failure failure = withUserLock(user.getUserName(), () -> {
+        FailedLogin failure = withUserLock(user.getUserName(), () -> {
           Instant failureTime = clock.instant();
           UserProfile profile = organizationService.getUserProfileHandler().findUserProfileByName(userName);
           if (profile == null) {
@@ -183,9 +182,9 @@ public class AntiBruteForceAuthenticationPlugin extends SecurityCheckAuthenticat
           organizationService.getUserProfileHandler().saveUserProfile(profile, true);
           recordedStates.put(user.getUserName(), next);
           removeExpiredStates(failureTime);
-          return new Failure(failureTime, previous, next);
+          return new FailedLogin(failureTime, previous, next);
         });
-        Instant now = failure.now();
+        Instant now = failure.time();
         FailedLoginState previousState = failure.previousState();
         FailedLoginState newState = failure.newState();
 
@@ -324,7 +323,7 @@ public class AntiBruteForceAuthenticationPlugin extends SecurityCheckAuthenticat
                  userName,
                  USER_LOCK_TIMEOUT_SECONDS);
       }
-    } catch (InterruptedException e) {
+    } catch (InterruptedException _) {
       Thread.currentThread().interrupt();
       LOG.warn("Login attempts of user {} counted without lock: interrupted while waiting for the lock", userName);
       locked = false;
@@ -353,7 +352,7 @@ public class AntiBruteForceAuthenticationPlugin extends SecurityCheckAuthenticat
       return new FailedLoginState(attempts == null ? 0 : Integer.parseInt(attempts),
                                   latestFailureTime == null ? Instant.EPOCH
                                                             : Instant.ofEpochMilli(Long.parseLong(latestFailureTime)));
-    } catch (NumberFormatException e) {
+    } catch (NumberFormatException _) {
       // Read as no failure, so that the next login writes valid values again
       LOG.warn("Unreadable login attempts of user {}: {}={}, {}={}",
                profile.getUserName(),
