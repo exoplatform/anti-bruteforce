@@ -34,6 +34,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -167,29 +168,26 @@ public class AntiBruteForceAuthenticationPlugin extends SecurityCheckAuthenticat
     try {
       User user = organizationService.getUserHandler().findUserByName(userName);
       if (user != null) {
-        Instant now;
-        FailedLoginState previousState;
-        FailedLoginState newState;
-        Lock userLock = getUserLock(user.getUserName());
-        boolean locked = lock(userLock, userName);
-        try {
-          now = clock.instant();
+        record Failure(Instant now, FailedLoginState previousState, FailedLoginState newState) {
+        }
+        Failure failure = withUserLock(user.getUserName(), () -> {
+          Instant failureTime = clock.instant();
           UserProfile profile = organizationService.getUserProfileHandler().findUserProfileByName(userName);
           if (profile == null) {
             profile = organizationService.getUserProfileHandler().createUserProfileInstance(userName);
           }
-          previousState = FailedLoginState.latest(toState(profile), getRecordedState(user.getUserName(), now));
-          newState = nextState(previousState, now);
-          profile.setAttribute(AUTHENTICATION_ATTEMPTS, String.valueOf(newState.attempts()));
-          profile.setAttribute(LATEST_AUTH_TIME, String.valueOf(newState.latestFailureTime().toEpochMilli()));
+          FailedLoginState previous = FailedLoginState.latest(toState(profile), getRecordedState(user.getUserName(), failureTime));
+          FailedLoginState next = nextState(previous, failureTime);
+          profile.setAttribute(AUTHENTICATION_ATTEMPTS, String.valueOf(next.attempts()));
+          profile.setAttribute(LATEST_AUTH_TIME, String.valueOf(next.latestFailureTime().toEpochMilli()));
           organizationService.getUserProfileHandler().saveUserProfile(profile, true);
-          recordedStates.put(user.getUserName(), newState);
-          removeExpiredStates(now);
-        } finally {
-          if (locked) {
-            userLock.unlock();
-          }
-        }
+          recordedStates.put(user.getUserName(), next);
+          removeExpiredStates(failureTime);
+          return new Failure(failureTime, previous, next);
+        });
+        Instant now = failure.now();
+        FailedLoginState previousState = failure.previousState();
+        FailedLoginState newState = failure.newState();
 
         if (isLocked(previousState, now)) {
           // A request that passed doCheck before the lock was recorded: the
@@ -229,9 +227,7 @@ public class AntiBruteForceAuthenticationPlugin extends SecurityCheckAuthenticat
     try {
       User user = organizationService.getUserHandler().findUserByName(userName);
       if (user != null) {
-        Lock userLock = getUserLock(user.getUserName());
-        boolean locked = lock(userLock, userName);
-        try {
+        withUserLock(user.getUserName(), () -> {
           UserProfile profile = organizationService.getUserProfileHandler().findUserProfileByName(userName);
           if (profile == null) {
             profile = organizationService.getUserProfileHandler().createUserProfileInstance(userName);
@@ -244,11 +240,8 @@ public class AntiBruteForceAuthenticationPlugin extends SecurityCheckAuthenticat
             // failure running in parallel must not count from the stored attempts
             recordedStates.put(user.getUserName(), new FailedLoginState(0, clock.instant()));
           }
-        } finally {
-          if (locked) {
-            userLock.unlock();
-          }
-        }
+          return null;
+        });
         if (LOG.isDebugEnabled()) {
           LOG.debug(SERVICE + "=" + LOGIN + " " + OPERATION + "=" + LOGIN + " " + STATUS + "=" + STATUS_OK
               + " parameters=\"username:{}, authenticationAttempts:{}, maxAuthenticationAttempts:{}\"",
@@ -314,25 +307,36 @@ public class AntiBruteForceAuthenticationPlugin extends SecurityCheckAuthenticat
   }
 
   /**
-   * Waits for the lock of the user's stripe for {@code USER_LOCK_TIMEOUT_SECONDS}
-   * at most, so that a burst of failures delays the other logins of that stripe
-   * by a bounded time. Past it, the login is counted without the lock: parallel
-   * failures of that user can then lose increments and each send the "account
-   * locked" email again.
+   * Runs the work holding the lock of the user's stripe, released whatever the
+   * work does. Waits for that lock for {@code USER_LOCK_TIMEOUT_SECONDS} at
+   * most, so that a burst of failures delays the other logins of that stripe by
+   * a bounded time. Past it, the work runs without the lock: parallel failures
+   * of that user can then lose increments and each send the "account locked"
+   * email again.
    */
-  private boolean lock(Lock userLock, String userName) {
+  private <T> T withUserLock(String userName, Callable<T> work) throws Exception {
+    Lock userLock = getUserLock(userName);
+    boolean locked;
     try {
-      if (userLock.tryLock(USER_LOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
-        return true;
+      locked = userLock.tryLock(USER_LOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+      if (!locked) {
+        LOG.warn("Login attempts of user {} counted without lock: lock not acquired within {} seconds",
+                 userName,
+                 USER_LOCK_TIMEOUT_SECONDS);
       }
-      LOG.warn("Login attempts of user {} counted without lock: lock not acquired within {} seconds",
-               userName,
-               USER_LOCK_TIMEOUT_SECONDS);
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       LOG.warn("Login attempts of user {} counted without lock: interrupted while waiting for the lock", userName);
+      locked = false;
     }
-    return false;
+    if (locked) {
+      try {
+        return work.call();
+      } finally {
+        userLock.unlock();
+      }
+    }
+    return work.call();
   }
 
   private Lock getUserLock(String userName) {
